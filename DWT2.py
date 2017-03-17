@@ -4,7 +4,8 @@ import cv2
 import sys
 import math
 
-def w2d(img, mode='haar', level=1):
+
+def DWT(img, mode='haar', level=1):
 
     #loadImage & copy image
     imArray = cv2.imread(img)
@@ -18,28 +19,9 @@ def w2d(img, mode='haar', level=1):
 
     result4=inverseWaveleteTransform(imArray3,height/2,width/2)
 
-    #Datatype conversions
-    #convert to grayscale
-    # imArray = cv2.cvtColor( imArray,cv2.COLOR_RGB2GRAY )
-    #convert to float
-    # imArray =  np.float32(imArray)
-    # imArray /= 255;
-    # compute coefficients
-    coeffs=pywt.wavedec2(imArray, mode, level=level)
 
-    #Process Coefficients
-    coeffs_H=list(coeffs)
-    coeffs_H[0] *= 0;
-
-    # reconstruction
-    imArray_H=pywt.waverec2(coeffs_H, mode);
-    # imArray_H*= 255;
-    imArray_H =  np.uint8(imArray_H)
-    #Display result
-    cv2.imshow('DWT ?',imArray_H)
     cv2.imshow('base Image',imArray)
     cv2.imshow('DWT',imArray2)
-    cv2.imshow('imarray3',imArray3)
     cv2.imshow('result4',result4)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
@@ -109,4 +91,4 @@ def inverseWaveleteTransform(image,nc,nr):
 
 
 
-w2d(sys.argv[1],'db1',1)
+DWT(sys.argv[1],'db1',1)
