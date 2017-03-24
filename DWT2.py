@@ -1,40 +1,33 @@
 import numpy as np
-import pywt
 import cv2
 import sys
-import math
 
 
-def DWT(img, mode='haar', level=1):
+def main(img):
 
     #loadImage & copy image
-    imArray = cv2.imread(img)
-    width, height, dimension= imArray.shape[:3]
-    result = np.zeros((height,width,dimension), np.uint8)
+    image = cv2.imread(img)
+    height, width= image.shape[:2]
 
-    imArray2=waveleteTransform(imArray,width,height)
+    image2, imArray2 =waveleteTransform(image,width,height)
 
-    imArray3=np.copy(imArray2)
-    result2=np.zeros((height/2,width/2,dimension), np.uint8)
+    image3, imArray3=inverseWaveleteTransform(imArray2,width,height)
 
-    result4=inverseWaveleteTransform(imArray3,height/2,width/2)
-
-
-    cv2.imshow('base Image',imArray)
-    cv2.imshow('DWT',imArray2)
-    cv2.imshow('result4',result4)
+    cv2.imshow('base Image',image)
+    cv2.imshow('DWT',image2)
+    cv2.imshow('result4',image3)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
 
-def waveleteTransform(image,width,height):
-    result=np.copy(image)
+def waveleteTransform(img,width,height):
+    image=img.astype(np.int)
+    result = np.zeros((height,width,3), np.int)
 
     #Horizontal processing
     width2 = width/2;
     for i in range(height):
-
-        for j in range(0,width,2):
+        for j in range(0,width-1,2):
 
             j1 = j+1;
             j2 = j/2;
@@ -42,13 +35,12 @@ def waveleteTransform(image,width,height):
             result[i,j2] = (image[i,j] + image[i,j1])/2;
             result[i,width2+j2] = (image[i,j] - image[i,j1])/2;
 
-
     #copy array
     image=np.copy(result)
 
     # Vertical processing:
     height2 = height/2;
-    for i in range(0,height,2):
+    for i in range(0,height-1,2):
         for j in range(0,width):
 
             i1 = i+1;
@@ -57,11 +49,13 @@ def waveleteTransform(image,width,height):
             result[i2,j] = (image[i,j] + image[i1,j])/2;
             result[height2+i2,j] = (image[i,j] - image[i1,j])/2;
 
-    return result
+    resultimg=result.astype(np.uint8)
+    return resultimg ,result
 
 
-def inverseWaveleteTransform(image,nc,nr):
-    result=np.zeros((nr,nc,3), np.uint8)
+def inverseWaveleteTransform(img,nc,nr):
+    image=img.astype(np.int)
+    result=np.zeros((nr,nc,3), np.int)
     nr2 = nr/2;
 
     for i in range(0,nr-1,2):
@@ -70,8 +64,8 @@ def inverseWaveleteTransform(image,nc,nr):
             i1 = i+1
             i2 = i/2
 
-            result[i,j] += ((image[i2,j]/2) + (image[nr2+i2,j]/2))*2;
-            result[i1,j] += ((image[i2,j]/2) - (image[nr2+i2,j]/2))*2;
+            result[i,j] = ((image[i2,j]/2) + (image[nr2+i2,j]/2))*2;
+            result[i1,j] = ((image[i2,j]/2) - (image[nr2+i2,j]/2))*2;
 
     # //copy array
     image=np.copy(result)
@@ -85,10 +79,9 @@ def inverseWaveleteTransform(image,nc,nr):
             j2 = j/2;
             result[i,j] = ((image[i,j2]/2) + (image[i,j2+nc2]/2))*2;
             result[i,j1] =((image[i,j2]/2) - (image[i,j2+nc2]/2))*2;
-    #
 
-    return result;
+    resultimg=result.astype(np.uint8)
+    return resultimg, result;
 
 
-
-DWT(sys.argv[1],'db1',1)
+main(sys.argv[1])
